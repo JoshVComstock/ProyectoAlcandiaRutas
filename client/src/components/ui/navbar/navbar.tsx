@@ -1,97 +1,106 @@
-import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ButtonNav } from "./buttonNav";
-import Perfil from "./perfil";
-import { mainNavItems, NavItem, secondaryNavItems } from "./navItems";
-import { IconLogout } from "../icons";
-// import Button from "@/components/common/button";
-import { ROUTES } from "@/types/enums/Routes";
-import Logo from "@assets/LogoSistemas.png";
-import { Button } from "../button";
+import React, { useState } from "react";
+import { Home, CarTaxiFront, Bus, Car, Truck, LogOut } from "lucide-react";
 
-interface Props {
-  isExpanded?: boolean;
-}
-
-const Navbar = ({ isExpanded }: Props) => {
-  const navigate = useNavigate();
-  const [forma, setForma] = useState({
-    caminar: false,
-    auto: false,
-    trufi: false,
-    micro: false,
-  });
-  const [expandedItem, setExpandedItem] = useState<string | null>(null);
-
-  const redirect = (path: string) => {
-    navigate(path);
-  };
-  const handleItemClick = useCallback((path: string) => {
-    setExpandedItem((prev) => (prev === path ? null : path));
-    if (path) {
-      redirect(path);
-    }
-  }, []);
-
-  const renderNavItems = (items: NavItem[]) =>
-    items.map((item, i) => (
-      <div key={i} className="w-full">
-        <ButtonNav
-          onClick={() => handleItemClick(item.path)}
-          label={isExpanded ? item.label : ""}
-          icon={item.icon}
-        />
-        {item.children && expandedItem === item.path && (
-          <div
-            className={`${
-              isExpanded ? "" : "w-[80%] mx-auto"
-            } py-2 bg-gray-200 w-full rounded-lg  `}
-          >
-            {item.children.map((child, i) => (
-              <ButtonNav
-                key={i}
-                onClick={() => redirect(child.path)}
-                label={isExpanded ? child.label : ""}
-                icon={child.icon}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    ));
+const Navbar = () => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const navItems = [
+    { icon: Home, label: "Caminar", color: "bg-green-500" },
+    { icon: CarTaxiFront, label: "Taxi", color: "bg-yellow-500" },
+    { icon: Bus, label: "Micro", color: "bg-blue-500" },
+    { icon: Car, label: "Auto propio", color: "bg-red-500" },
+    { icon: Truck, label: "Trufi", color: "bg-purple-500" },
+  ];
 
   return (
-    <nav
-      className={`${
-        isExpanded ? "w-[350px] p-8" : "w-[80px] p-0 py-8"
-      } bg-customWhite shadow-lg h-screen flex flex-col transition-all duration-300 justify-center items-center gap-4`}
-    >
-      <Perfil photo={Logo} description={`${isExpanded ? "" : ""}`} />
-      <article className="w-full py-4 flex gap-2 flex-col">
-        <Button
-          label="Caminar"
-          onClick={() => setForma({ ...forma, caminar: !forma.caminar })}
-        />
-        <Button
-          label="Auto"
-          onClick={() => setForma({ ...forma, auto: !forma.auto })}
-        />
-        <Button
-          label="Trufi"
-          onClick={() => setForma({ ...forma, trufi: !forma.trufi })}
-        />
-        <Button
-          label="Micro"
-          onClick={() => setForma({ ...forma, micro: !forma.micro })}
-        />
-      </article>
-      <ButtonNav
-        onClick={() => redirect(ROUTES.LOGIN)}
-        label={isExpanded ? "Salir" : ""}
-        icon={IconLogout}
-        important
-      />
-    </nav>
+    <div className="flex z-20 h-screen antialiased text-gray-900 w-[500px] dark:bg-dark dark:text-light">
+      <div
+        className={`fixed inset-y-0 z-10 flex w-80 transition-transform duration-300 transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <svg
+          className="absolute inset-0 w-full h-full text-white"
+          style={{ filter: "drop-shadow(10px 0 10px #00000030)" }}
+          preserveAspectRatio="none"
+          viewBox="0 0 309 800"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M268.487 0H0V800H247.32C207.957 725 207.975 492.294 268.487 367.647C329 243 314.906 53.4314 268.487 0Z" />
+        </svg>
+
+        <div className="z-10 flex flex-col w-52 flex-1">
+          <div className="flex items-center justify-between flex-shrink-0 w-64 p-4">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-1 rounded-lg focus:outline-none focus:ring"
+            >
+              <svg
+                className="w-6 h-6"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              <span className="sr-only">Close sidebar</span>
+            </button>
+          </div>
+
+          <nav className="flex flex-col p-4">
+            {navItems.map((item, index) => (
+              <a
+                key={index}
+                href="#"
+                className={`flex w-[250px] items-center space-x-4 py-3 px-2 rounded-lg mb-2 transition-all duration-200 ease-in-out ${item.color} bg-opacity-20 hover:bg-opacity-30 group`}
+              >
+                <item.icon className={`w-6 h-6 ${item.color.replace('bg-', 'text-')} group-hover:text-opacity-80`} />
+                <span className={`text-sm font-medium ${item.color.replace('bg-', 'text-')} group-hover:text-opacity-80`}>
+                  {item.label}
+                </span>
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex-shrink-0 p-4">
+            <button className="flex items-center space-x-2 text-gray-500 hover:text-gray-700">
+              <LogOut className="w-6 h-6" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main className="flex flex-col items-center justify-center flex-1">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed p-2 text-white bg-black rounded-lg top-5 left-5"
+        >
+          <svg
+            className="w-6 h-6"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+          <span className="sr-only">Open menu</span>
+        </button>
+      </main>
+    </div>
   );
 };
 
