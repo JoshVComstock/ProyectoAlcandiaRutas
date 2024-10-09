@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
 import "leaflet-routing-machine";
+import { useUser } from "@/hook/useUser";
 
 const Routing: React.FC<{
   start: LatLngExpression;
@@ -14,7 +15,13 @@ const Routing: React.FC<{
   useEffect(() => {
     if (!map) return;
 
-    // Primer segmento (start -> middle)
+    const hideRoutingInstructions = (routingControl: any) => {
+      const container = routingControl.getContainer();
+      if (container) {
+        container.style.display = "none";
+      }
+    };
+
     const firstSegment = L.Routing.control({
       waypoints: [L.latLng(start), L.latLng(middle)],
       routeWhileDragging: true,
@@ -23,7 +30,8 @@ const Routing: React.FC<{
       },
     }).addTo(map);
 
-    // Segundo segmento (middle -> end)
+    hideRoutingInstructions(firstSegment);
+
     const secondSegment = L.Routing.control({
       waypoints: [L.latLng(middle), L.latLng(end)],
       routeWhileDragging: true,
@@ -31,8 +39,8 @@ const Routing: React.FC<{
         styles: [{ color: "red", weight: 4 }],
       },
     }).addTo(map);
+    hideRoutingInstructions(secondSegment);
 
-    // Último segmento (end -> más allá)
     const thirdSegment = L.Routing.control({
       waypoints: [L.latLng(end), L.latLng(end[0] + 0.01, end[1] + 0.01)],
       routeWhileDragging: false,
@@ -40,6 +48,7 @@ const Routing: React.FC<{
         styles: [{ color: "green", weight: 4 }],
       },
     }).addTo(map);
+    hideRoutingInstructions(thirdSegment);
 
     return () => {
       map.removeControl(firstSegment);
@@ -53,20 +62,26 @@ const Routing: React.FC<{
 
 const Home = () => {
   const [showRoutes, setShowRoutes] = useState(false);
-  const positionStart: LatLngExpression = [-17.3751, -66.15868];
-  const positionMiddle: LatLngExpression = [-17.3776, -66.16234];
-  const positionEnd: LatLngExpression = [-17.3801, -66.165];
+  const { user } = useUser(); // Obtener el usuario desde el contexto
 
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        center={positionStart}
+        center={user.rutas[0].start} // Cambiar al inicio de la primera ruta
         zoom={13}
         zoomControl={false}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Routing start={positionStart} middle={positionMiddle} end={positionEnd} />
+        
+        {user.rutas.map((ruta) => (
+          <Routing
+            key={ruta.id}
+            start={ruta.start}
+            middle={ruta.middle}
+            end={ruta.end}
+          />
+        ))}
       </MapContainer>
 
       <button
@@ -87,7 +102,7 @@ const Home = () => {
         {showRoutes ? "Ocultar Rutas" : "Mostrar Rutas"}
       </button>
 
-      {showRoutes && (
+      {showRoutes && user.rutas.length > 0 && (
         <div
           style={{
             position: "absolute",
@@ -103,12 +118,17 @@ const Home = () => {
             overflowY: "auto",
           }}
         >
-          <h3>Detalles de la Ruta</h3>
-          <p>Punto de inicio: [-17.3751, -66.15868]</p>
-          <p>Punto intermedio: [-17.3776, -66.16234]</p>
-          <p>Punto de fin: [-17.3801, -66.165]</p>
-          <p>Distancia aproximada: 1.5 km</p>
-          <p>Tiempo estimado: 10 minutos</p>
+          <h3>Detalles de las Rutas</h3>
+          {user.rutas.map((ruta) => (
+            <div key={ruta.id}>
+              <p>Punto de inicio: {JSON.stringify(ruta.start)}</p>
+              <p>Punto intermedio: {JSON.stringify(ruta.middle)}</p>
+              <p>Punto de fin: {JSON.stringify(ruta.end)}</p>
+              <p>Distancia aproximada: 1.5 km</p>
+              <p>Tiempo estimado: 10 minutos</p>
+              <hr />
+            </div>
+          ))}
         </div>
       )}
     </div>

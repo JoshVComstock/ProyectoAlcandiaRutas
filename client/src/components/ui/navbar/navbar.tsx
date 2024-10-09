@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Home, CarTaxiFront, Bus, Car, Truck, LogOut } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/types/enums/Routes";
+import toast from "react-hot-toast";
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const navItems = [
     { icon: Home, label: "Caminar", color: "bg-green-500" },
@@ -10,6 +13,10 @@ const Navbar = () => {
     { icon: Car, label: "Auto propio", color: "bg-red-500" },
     { icon: Truck, label: "Trufi", color: "bg-purple-500" },
   ];
+  const handlelogout = () => {
+    navigate(ROUTES.LOGIN);
+    toast.success("Cerra sesion correctamente!");
+  };
 
   return (
     <div className="flex z-20 h-screen antialiased text-gray-900 w-[500px] dark:bg-dark dark:text-light">
@@ -61,8 +68,18 @@ const Navbar = () => {
                 href="#"
                 className={`flex w-[250px] items-center space-x-4 py-3 px-2 rounded-lg mb-2 transition-all duration-200 ease-in-out ${item.color} bg-opacity-20 hover:bg-opacity-30 group`}
               >
-                <item.icon className={`w-6 h-6 ${item.color.replace('bg-', 'text-')} group-hover:text-opacity-80`} />
-                <span className={`text-sm font-medium ${item.color.replace('bg-', 'text-')} group-hover:text-opacity-80`}>
+                <item.icon
+                  className={`w-6 h-6 ${item.color.replace(
+                    "bg-",
+                    "text-"
+                  )} group-hover:text-opacity-80`}
+                />
+                <span
+                  className={`text-sm font-medium ${item.color.replace(
+                    "bg-",
+                    "text-"
+                  )} group-hover:text-opacity-80`}
+                >
                   {item.label}
                 </span>
               </a>
@@ -70,7 +87,10 @@ const Navbar = () => {
           </nav>
 
           <div className="flex-shrink-0 p-4">
-            <button className="flex items-center space-x-2 text-gray-500 hover:text-gray-700">
+            <button
+              className="flex items-center space-x-2 text-gray-500 hover:text-gray-700"
+              onClick={handlelogout}
+            >
               <LogOut className="w-6 h-6" />
               <span>Logout</span>
             </button>

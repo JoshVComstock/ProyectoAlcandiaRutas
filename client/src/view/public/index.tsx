@@ -2,11 +2,34 @@ import { ROUTES } from "@/types/enums/Routes";
 import { useNavigate } from "react-router-dom";
 import Back from "@assets/LoginBack.png";
 import Logo from "@assets/LogoSistemas.png";
+import { data } from "../../data/user";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useUser } from "@/hook/useUser";
 const Login = () => {
   const navigate = useNavigate();
+  const [usuario, setUsuario] = useState("");
+  const [password, setPassword] = useState("");
+  const { setUser } = useUser();
+  const handleInicio = (e: any) => {
+    e.preventDefault();
+    if (usuario && password) {
+      const user = data.find((v) => v.usuario === usuario);
 
-  const handleInicio = () => {
-    navigate(ROUTES.DASHBOARD);
+      if (user) {
+        if (user.contrasena === password) {
+          toast.success("Datos correctos!");
+          navigate(ROUTES.DASHBOARD);
+          setUser(user);
+        } else {
+          toast.error("Contraseña incorrecta");
+        }
+      } else {
+        toast.error("Usuario no encontrado");
+      }
+    } else {
+      toast.error("Por favor, ingresa el usuario y la contraseña");
+    }
   };
 
   return (
@@ -23,13 +46,15 @@ const Login = () => {
           <form className="space-y-6 w-[70%] ">
             <div>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="usuario"
+                name="usuario"
+                type="text"
+                autoComplete="usuario"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary100"
                 placeholder="Usuario"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
               />
             </div>
             <div>
@@ -37,6 +62,8 @@ const Login = () => {
                 id="password"
                 name="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary100"
