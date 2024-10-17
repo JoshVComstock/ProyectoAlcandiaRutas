@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  StyleSheet,
   TouchableOpacity,
   Text,
   SafeAreaView,
@@ -9,23 +8,26 @@ import {
   Alert,
 } from "react-native";
 import * as Location from "expo-location";
-import firebase from "firebase/app";
-import "firebase/firestore";
-import { db } from "../firebaseConfig";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import useGet from "../hook/useGet";
+import { useUser } from "../hook/useUser";
+import { stylesHome } from "../style/homeStyle";
+import axios from "axios";
 
 export default function HomeScreen({ navigation }) {
   const [isStarted, setIsStarted] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
   const [location, setLocation] = useState(null);
-
-  const transportModes = ["Caminar", "Bicicleta", "Moto", "Taxi"];
-
+  const { data } = useGet(`tipoCaminata`);
+  const [IdCaminata, setIdCaminata] = useState();
+  const { user, logout } = useUser();
+  const [routes, setRoutes] = useState([]);
+  const [currentRoute, setCurrentRoute] = useState(null);
+  const [linea, setLinea] = useState("");
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
+        alert(
           "Permiso denegado",
           "Necesitamos permiso para acceder a tu ubicación."
         );
@@ -41,121 +43,160 @@ export default function HomeScreen({ navigation }) {
       locationSubscription = Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 10,
+          timeInterval: 1000,
+          distanceInterval: 0,
         },
         (newLocation) => {
           setLocation(newLocation);
-          saveLocationToFirebase(newLocation);
+          updateCurrentRoute(newLocation);
         }
       );
     } else if (locationSubscription) {
-        locationSubscription.then((subscription) => subscription.remove());
+      locationSubscription.then((subscription) => subscription.remove());
     }
 
     return () => {
       if (locationSubscription) {
         locationSubscription.then((subscription) => subscription.remove());
-    }
+      }
     };
   }, [isStarted]);
 
-  const saveLocationToFirebase = async (newLocation) => {
-    try {
-      await addDoc(collection(db, "locations"), {
-        latitude: newLocation.coords.latitude,
-        longitude: newLocation.coords.longitude,
-        timestamp: serverTimestamp(),
-        transportMode: selectedMode,
+  useEffect(() => {
+    if (selectedMode) {
+      // Si ya hay una ruta en curso, guardarla antes de iniciar una nueva
+      if (isStarted && currentRoute) {
+        setRoutes((prevRoutes) => [...prevRoutes, currentRoute]);
+      }
+
+      // Iniciar una nueva ruta con el nuevo modo de transporte seleccionado
+      setCurrentRoute(null); // Reiniciar la ruta actual para el nuevo modo de transporte
+    }
+  }, [selectedMode]);
+
+  const updateCurrentRoute = (newLocation) => {
+    const coords = [newLocation.coords.latitude, newLocation.coords.longitude];
+
+    if (!currentRoute) {
+      setCurrentRoute({
+        IdTipoCaminata: IdCaminata,
+        start: coords,
+        middle: coords,
+        end: coords,
       });
-    } catch (error) {
-      console.error("Error saving location to Firebase:", error);
+    } else {
+      setCurrentRoute((prev) => ({
+        ...prev,
+        middle: coords,
+        end: coords,
+      }));
     }
   };
 
   const handleStart = () => {
     if (!selectedMode) {
-      Alert.alert(
+      alert(
         "Modo no seleccionado",
         "Por favor, selecciona un modo de transporte antes de comenzar."
       );
       return;
     }
+    if (isStarted) {
+      if (currentRoute) {
+        setRoutes((prevRoutes) => [...prevRoutes, currentRoute]);
+        setCurrentRoute(null);
+        enviarRutasAlServidor();
+      }
+    }
     setIsStarted(!isStarted);
+  };
+
+  const enviarRutasAlServidor = async () => {
+    try {
+      const response = await axios.post("http://127.0.0.1:3000/usuarioRuta", {
+        idUsuario: user.idUsuario,
+        rutas: routes,
+      });
+
+      alert("Éxito", "Las rutas se han enviado correctamente.");
+      setRoutes([]);
+    } catch (error) {
+      alert("Error", "No se pudieron enviar las rutas.");
+      console.error("Error enviando las rutas: ", error);
+    }
   };
 
   const handleModeSelection = (mode) => {
     setSelectedMode(mode);
+    setIdCaminata(mode.id);
   };
-
-  const handleExit = () => {
-    if (isStarted) {
-      Alert.alert(
-        "Viaje en progreso",
-        "¿Estás seguro de que quieres salir? El rastreo de ubicación se detendrá.",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Salir", onPress: () => navigation.navigate("Login") },
-        ]
-      );
-    } else {
-      navigation.navigate("Login");
+  const handleLinea = (nombre) => {
+    if (nombre == "trufi") {
+      
+      setLinea()
     }
   };
-  console.log(location)
+  if (!user) {
+    return <Text>Cargando usuario...</Text>;
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={stylesHome.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <View style={styles.header}>
-        <Text style={styles.title}>Mi Aplicación de Transporte</Text>
-        <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
-          <Text style={styles.exitButtonText}>Salir</Text>
+      <View style={stylesHome.header}>
+        <Text style={stylesHome.title}>Mi Aplicación de Transporte</Text>
+        <TouchableOpacity
+          style={stylesHome.exitButton}
+          onPress={() => logout(navigation)}
+        >
+          <Text style={stylesHome.exitButtonText}>Salir</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.content}>
-        <Text style={styles.subtitle}>
+      <View style={stylesHome.content}>
+        <Text style={stylesHome.subtitle}>
           {isStarted ? "¡Viaje en progreso!" : "Listo para comenzar"}
         </Text>
 
         <TouchableOpacity
-          style={[styles.circularButton, isStarted ? styles.startedButton : {}]}
+          style={[
+            stylesHome.circularButton,
+            isStarted ? stylesHome.startedButton : {},
+          ]}
           onPress={handleStart}
         >
-          <Text style={styles.buttonText}>
+          <Text style={stylesHome.buttonText}>
             {isStarted ? "Detener" : "Comenzar"}
           </Text>
         </TouchableOpacity>
 
         {location && (
-          <Text style={styles.locationText}>
+          <Text style={stylesHome.locationText}>
             Lat: {location.coords.latitude.toFixed(4)}, Lon:{" "}
             {location.coords.longitude.toFixed(4)}
           </Text>
         )}
 
-        <Text style={styles.instructionText}>
+        <Text style={stylesHome.instructionText}>
           Selecciona tu modo de transporte:
         </Text>
       </View>
-
-      <View style={styles.bottomButtons}>
-        {transportModes.map((mode, index) => (
+      <View style={stylesHome.bottomButtons}>
+        {data?.map((mode, index) => (
           <TouchableOpacity
             key={index}
             style={[
-              styles.modeButton,
-              selectedMode === mode ? styles.selectedModeButton : {},
+              stylesHome.modeButton,
+              selectedMode === mode ? stylesHome.selectedModeButton : {},
             ]}
             onPress={() => handleModeSelection(mode)}
           >
             <Text
               style={[
-                styles.modeButtonText,
-                selectedMode === mode ? styles.selectedModeButtonText : {},
+                stylesHome.modeButtonText,
+                selectedMode === mode ? stylesHome.selectedModeButtonText : {},
               ]}
             >
-              {mode}
+              {mode.nombre}
             </Text>
           </TouchableOpacity>
         ))}
@@ -163,90 +204,3 @@ export default function HomeScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(151, 71, 255, 0.2)",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#6200ff",
-  },
-  exitButton: {
-    backgroundColor: "rgba(151, 71, 255, 0.2)",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-  },
-  exitButtonText: {
-    color: "#6200ff",
-    fontWeight: "bold",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  subtitle: {
-    fontSize: 18,
-    color: "#0061cf",
-    marginBottom: 20,
-  },
-  circularButton: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#6200ff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-    marginBottom: 30,
-  },
-  startedButton: {
-    backgroundColor: "#0061cf",
-  },
-  buttonText: {
-    fontSize: 24,
-    color: "white",
-    fontWeight: "bold",
-  },
-  instructionText: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 10,
-  },
-  bottomButtons: {
-    width: 100,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 20,
-    backgroundColor: "rgba(151, 71, 255, 0.1)",
-  },
-  modeButton: {
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 20,
-    alignItems: "center",
-    minWidth: 80,
-    elevation: 2,
-  },
-  selectedModeButton: {
-    backgroundColor: "#6200ff",
-  },
-  modeButtonText: {
-    color: "#6200ff",
-    fontWeight: "bold",
-  },
-  selectedModeButtonText: {
-    color: "#fff",
-  },
-});

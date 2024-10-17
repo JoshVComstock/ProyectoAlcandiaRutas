@@ -62,19 +62,26 @@ const Routing: React.FC<{
 
 const Home = () => {
   const [showRoutes, setShowRoutes] = useState(false);
-  const { user } = useUser(); // Obtener el usuario desde el contexto
+  const { user } = useUser();
 
   return (
-    <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
+    <div
+      style={{
+        height: "100vh",
+        width: "100vw",
+        position: "relative",
+        zIndex: "0",
+      }}
+    >
       <MapContainer
         style={{ height: "100%", width: "100%" }}
-        center={user.rutas[0].start} // Cambiar al inicio de la primera ruta
+        center={user?.rutas?.[0]?.start || [0, 0]}
         zoom={13}
         zoomControl={false}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        
-        {user.rutas.map((ruta) => (
+
+        {user?.rutas?.map((ruta) => (
           <Routing
             key={ruta.id}
             start={ruta.start}
@@ -102,7 +109,7 @@ const Home = () => {
         {showRoutes ? "Ocultar Rutas" : "Mostrar Rutas"}
       </button>
 
-      {showRoutes && user.rutas.length > 0 && (
+      {showRoutes && (
         <div
           style={{
             position: "absolute",
@@ -119,7 +126,7 @@ const Home = () => {
           }}
         >
           <h3>Detalles de las Rutas</h3>
-          {user.rutas.map((ruta) => (
+          {user?.rutas?.map((ruta) => (
             <div key={ruta.id}>
               <p>Punto de inicio: {JSON.stringify(ruta.start)}</p>
               <p>Punto intermedio: {JSON.stringify(ruta.middle)}</p>

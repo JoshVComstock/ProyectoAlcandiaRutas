@@ -15,12 +15,4 @@ export const ComponentsRouter: Record<
     name: "Dashboard",
     component: <div>Dashboard</div>,
   },
-  [ROUTES.INICIO]: {
-    name: "Dashboard Inicio",
-    component: <div>Dashboard Inicio</div>,
-  },
-  [ROUTES.PROFILE]: {
-    name: "Dashboard Profile",
-    component: <div>Dashboard Profile</div>,
-  },
 };

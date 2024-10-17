@@ -10,6 +10,7 @@ interface Route {
 interface User {
   nombre: string;
   usuario: string;
+  idUsuario: number;
   contrasena: string;
   rutas: Route[] | null;
 }
