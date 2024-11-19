@@ -2,30 +2,43 @@ import { ROUTES } from "@/types/enums/Routes";
 import { useNavigate } from "react-router-dom";
 import Back from "@assets/LoginBack.png";
 import Logo from "@assets/LogoSistemas.png";
-import { data } from "../../data/user";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useUser } from "@/hook/useUser";
+
 const Login = () => {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const { setUser } = useUser();
-  const handleInicio = (e: any) => {
+
+  const handleInicio = async (e: React.FormEvent) => {
     e.preventDefault();
     if (usuario && password) {
-      const user = data.find((v) => v.usuario === usuario);
+      try {
+        const response = await fetch("http://127.0.0.1:3000/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ usuario, password }),
+        });
 
-      if (user) {
-        if (user.contrasena === password) {
-          toast.success("Datos correctos!");
-          navigate(ROUTES.DASHBOARD);
-          setUser(user);
+        const result = await response.json();
+
+        if (response.ok) {
+          if (result.data) {
+            toast.success("Inicio de sesión correcto");
+            setUser(result.data);
+            navigate(ROUTES.DASHBOARD);
+          } else {
+            toast.error("Usuario no autorizado");
+          }
         } else {
-          toast.error("Contraseña incorrecta");
+          toast.error(result.message || "Usuario no autorizado");
         }
-      } else {
-        toast.error("Usuario no encontrado");
+      } catch (error) {
+        toast.error("Error de red. Por favor, verifica tu conexión.");
       }
     } else {
       toast.error("Por favor, ingresa el usuario y la contraseña");
@@ -37,13 +50,13 @@ const Login = () => {
       className="w-full h-full flex items-center justify-start bg-cover bg-center"
       style={{ backgroundImage: `url(${Back})` }}
     >
-      <div className="w-full h-full p-8 flex flex-col space-y-8 ">
+      <div className="w-full h-full p-8 flex flex-col space-y-8">
         <img src={Logo} alt="Logo" className="h-[10%] w-[200px]" />
-        <div className="space-y-6 h-[70%] w-[600px] flex flex-col justify-center items-center ">
+        <div className="space-y-6 h-[70%] w-[600px] flex flex-col justify-center items-center">
           <div className="text-center m-5">
             <h2 className="text-5xl font-bold text-primary">Login</h2>
           </div>
-          <form className="space-y-6 w-[70%] ">
+          <form className="space-y-6 w-[70%]" onSubmit={handleInicio}>
             <div>
               <input
                 id="usuario"
@@ -82,7 +95,7 @@ const Login = () => {
                   htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-900"
                 >
-                  Recuerdame
+                  Recuérdame
                 </label>
               </div>
               <div className="text-sm">
@@ -90,7 +103,7 @@ const Login = () => {
                   href="#"
                   className="font-medium text-primary hover:border-b-2"
                 >
-                  Olvidaste tu contraseña?
+                  ¿Olvidaste tu contraseña?
                 </a>
               </div>
             </div>
@@ -98,7 +111,6 @@ const Login = () => {
               <button
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary100 focus:outline-none"
-                onClick={handleInicio}
               >
                 Login
               </button>

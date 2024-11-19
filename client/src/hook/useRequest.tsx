@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { BACKEND_EXPRESS } from "@/components/config";
 interface UseRequestOptions extends RequestInit {}
 
 interface UseRequestResult<T> {
@@ -20,7 +20,7 @@ const useRequest = <T,>(
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(url, options);
+        const response = await fetch(BACKEND_EXPRESS + url, options);
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }

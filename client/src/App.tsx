@@ -1,17 +1,16 @@
-import { HashRouter } from "react-router-dom";
-import Routes from "./routes";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { UserProvider } from "./hook/useUser";
+import RoutesComponent from "./RoutesComponent";
 
-const queryClient = new QueryClient();
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" reverseOrder={false} />
-      <HashRouter>
-        <Routes />
-      </HashRouter>
-    </QueryClientProvider>
+    <UserProvider>
+      <Toaster />
+      <BrowserRouter>
+        <RoutesComponent />
+      </BrowserRouter>
+    </UserProvider>
   );
 }
 

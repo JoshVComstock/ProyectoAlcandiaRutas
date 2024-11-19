@@ -8,24 +8,8 @@ export interface NavItem {
 }
 
 export const mainNavItems:NavItem[] = [
-  {
-    path: ROUTES.INICIO,
-    label: "Inicio",
-    icon: IconHome,
-    children: [
-      { path: ROUTES.PRODUCTO_MOVIMIENTO, label: "Subruta 1", icon: IconHome },
-      {
-        path: ROUTES.PRODUCTO_MOVIMIENTO,
-        label: "Subruta 2",
-        icon: IconMessage,
-      },
-    ],
-  },
-  {
-    path: ROUTES.MESSAGE,
-    label: "Mensajes",
-    icon: IconMessage,
-  },
+  
+ 
 ];
 export const secondaryNavItems = [
   {
