@@ -8,12 +8,15 @@ const useGet = (url) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`https://backendrutas.onrender.com/${url}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          `https://backendrutas.onrender.com/${url}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Error al obtener los datos");
@@ -21,7 +24,6 @@ const useGet = (url) => {
 
         const result = await response.json();
         setData(result.data);
-        alert("Datos obtenidos correctamente");
       } catch (error) {
         console.error("Error:", error);
         setError(error.message);

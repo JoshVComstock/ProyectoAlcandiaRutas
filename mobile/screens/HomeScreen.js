@@ -6,6 +6,8 @@ import {
   SafeAreaView,
   StatusBar,
   Alert,
+  TextInput,
+  Modal,
 } from "react-native";
 import * as Location from "expo-location";
 import useGet from "../hook/useGet";
@@ -23,11 +25,12 @@ export default function HomeScreen({ navigation }) {
   const [routes, setRoutes] = useState([]);
   const [currentRoute, setCurrentRoute] = useState(null);
   const [linea, setLinea] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        alert(
+        Alert.alert(
           "Permiso denegado",
           "Necesitamos permiso para acceder a tu ubicación."
         );
@@ -62,17 +65,15 @@ export default function HomeScreen({ navigation }) {
     };
   }, [isStarted]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (selectedMode) {
-      // Si ya hay una ruta en curso, guardarla antes de iniciar una nueva
       if (isStarted && currentRoute) {
         setRoutes((prevRoutes) => [...prevRoutes, currentRoute]);
       }
 
-      // Iniciar una nueva ruta con el nuevo modo de transporte seleccionado
-      setCurrentRoute(null); // Reiniciar la ruta actual para el nuevo modo de transporte
+      setCurrentRoute(null);
     }
-  }, [selectedMode]);
+  }, [selectedMode]); */
 
   const updateCurrentRoute = (newLocation) => {
     const coords = [newLocation.coords.latitude, newLocation.coords.longitude];
@@ -83,6 +84,7 @@ export default function HomeScreen({ navigation }) {
         start: coords,
         middle: coords,
         end: coords,
+        linea: selectedMode?.nombre === "Trufi" ? linea : null,
       });
     } else {
       setCurrentRoute((prev) => ({
@@ -95,7 +97,7 @@ export default function HomeScreen({ navigation }) {
 
   const handleStart = () => {
     if (!selectedMode) {
-      alert(
+      Alert.alert(
         "Modo no seleccionado",
         "Por favor, selecciona un modo de transporte antes de comenzar."
       );
@@ -113,28 +115,45 @@ export default function HomeScreen({ navigation }) {
 
   const enviarRutasAlServidor = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:3000/usuarioRuta", {
-        idUsuario: user.idUsuario,
-        rutas: routes,
-      });
+      const response = await axios.post(
+        "https://backendrutas.onrender.com/usuarioRuta",
+        {
+          idUsuario: user.idUsuario,
+          rutas: routes,
+        }
+      );
 
-      alert("Éxito", "Las rutas se han enviado correctamente.");
+      Alert.alert("Éxito", "Las rutas se han enviado correctamente.");
       setRoutes([]);
     } catch (error) {
-      alert("Error", "No se pudieron enviar las rutas.");
+      Alert.alert("Error", "No se pudieron enviar las rutas.");
       console.error("Error enviando las rutas: ", error);
     }
   };
 
   const handleModeSelection = (mode) => {
+    if (currentRoute) {
+      setRoutes((prevRoutes) => [...prevRoutes, currentRoute]);
+      enviarRutasAlServidor();
+    }
     setSelectedMode(mode);
     setIdCaminata(mode.id);
-  };
-  const handleLinea = (nombre) => {
-    if (nombre == "trufi") {
-      
-      setLinea()
+    setLinea("");
+    setCurrentRoute(null);
+    if (mode.nombre === "Trufi") {
+      setIsModalVisible(true);
     }
+  };
+  const handleSaveLinea = () => {
+    if (!linea) {
+      Alert.alert("Error", "Por favor ingresar una linea valida");
+      return;
+    }
+    setIsModalVisible(false);
+  };
+  const handleCancelLinea = () => {
+    setLinea("");
+    setIsModalVisible(false);
   };
   if (!user) {
     return <Text>Cargando usuario...</Text>;
@@ -201,6 +220,34 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </View>
+      <Modal visible={isModalVisible} transparent animationType="slide">
+        <View style={stylesHome.modalContainer}>
+          <View style={stylesHome.modalContent}>
+            <Text style={stylesHome.modalTitle}>Ingrese la línea</Text>
+            <TextInput
+              style={stylesHome.modalInput}
+              placeholder="Número de línea"
+              value={linea}
+              onChangeText={(text) => setLinea(text)}
+              keyboardType="numeric"
+            />
+            <View style={stylesHome.modalButtons}>
+              <TouchableOpacity
+                style={stylesHome.modalButton}
+                onPress={handleSaveLinea}
+              >
+                <Text style={stylesHome.modalButtonText}>Guardar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={stylesHome.modalButton}
+                onPress={handleCancelLinea}
+              >
+                <Text style={stylesHome.modalButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

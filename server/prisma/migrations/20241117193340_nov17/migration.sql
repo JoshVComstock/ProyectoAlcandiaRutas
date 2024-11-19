@@ -26,6 +26,7 @@ CREATE TABLE "Ruta" (
     "idTipoCaminata" INTEGER NOT NULL,
     "fechaCreacion" TIMESTAMP(3) NOT NULL,
     "FechaModificacion" TIMESTAMP(3) NOT NULL,
+    "linea" TEXT,
 
     CONSTRAINT "Ruta_pkey" PRIMARY KEY ("id")
 );
@@ -34,7 +35,6 @@ CREATE TABLE "Ruta" (
 CREATE TABLE "TipoCaminata" (
     "id" SERIAL NOT NULL,
     "nombre" TEXT NOT NULL,
-    "linea" TEXT,
 
     CONSTRAINT "TipoCaminata_pkey" PRIMARY KEY ("id")
 );

@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }) {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch("https://backendrutas.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,11 +41,11 @@ export default function LoginScreen({ navigation }) {
           alert("Usuario no autorizado");
         }
       } else {
-        alert("Error", data.message || "Credenciales incorrectas");
+        alert("Error al introducir datos", data.message || "Credenciales incorrectas");
       }
     } catch (error) {
       console.error("Error de conexión:", error);
-      alert("Error", "Hubo un problema con la conexión al servidor.");
+      alert("Error al conectar", "Hubo un problema con la conexión al servidor.");
     }
   };
   console.log(user);

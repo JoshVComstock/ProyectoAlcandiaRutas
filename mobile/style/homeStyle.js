@@ -64,28 +64,85 @@ export const stylesHome = StyleSheet.create({
     bottomButtons: {
       width: "100%",
       flexDirection: "row",
-      justifyContent: "space-around",
-      paddingVertical: 10,
-      paddingHorizontal: 10,
-      backgroundColor: "rgba(151, 71, 255, 0.1)",
+      justifyContent: "center", 
+      flexWrap: "wrap",
+      gap: 12, 
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+    
     },
     modeButton: {
       backgroundColor: "white",
-      padding: 10,
-      borderRadius: 20,
-      alignItems: "center",
-      minWidth: 80,
-      elevation: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    alignItems: "center",
+    minWidth: 100,
+    borderWidth: 1,
+    borderColor: "rgba(98, 0, 255, 0.1)", // Borde sutil
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
     },
     selectedModeButton: {
       backgroundColor: "#6200ff",
+      borderColor: "#6200ff",
     },
     modeButtonText: {
       color: "#6200ff",
-      fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "600",
     },
     selectedModeButtonText: {
       color: "#fff",
     },
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+      width: "80%",
+      backgroundColor: "#fff",
+      borderRadius: 10,
+      padding: 20,
+      alignItems: "center",
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 10,
+    },
+    modalInput: {
+      width: "100%",
+      borderWidth: 1,
+      borderColor: "#ccc",
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    modalButtons: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      width: "100%",
+    },
+    modalButton: {
+      backgroundColor: "#007BFF",
+      padding: 10,
+      borderRadius: 5,
+      marginHorizontal: 5,
+    },
+    modalButtonText: {
+      color: "#fff",
+      fontWeight: "bold",
+    },
+    
   });
   

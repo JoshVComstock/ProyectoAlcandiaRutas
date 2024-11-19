@@ -111,7 +111,7 @@ const Register = ({ onRegister }) => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:3000/usuario", {
+      const response = await fetch("https://backendrutas.onrender.com/usuario", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

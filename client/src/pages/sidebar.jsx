@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
-import { Home, User, LogOut, ChevronLeft, MapIcon, Route } from "lucide-react";
+import { Home, User, LogOut, ChevronLeft, MapIcon, Route,MapPinHouseIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../hook/useUser";
 const SidebarContainer = styled(motion.div)`
@@ -120,11 +120,9 @@ const Sidebar = () => {
         />
       </CollapseButton>
       <nav>
-       
-          
         {user.nombre == "admin" ? (
           <>
-           <NavItem
+            <NavItem
               to={"/nav"}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -143,6 +141,14 @@ const Sidebar = () => {
             >
               <MapIcon size={20} />
               <NavText isCollapsed={isCollapsed}>Mapa de calor</NavText>
+            </NavItem>
+            <NavItem
+              to={"mapaCalorFiltro"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <MapPinHouseIcon size={20} />
+              <NavText isCollapsed={isCollapsed}>Filtrar mapa</NavText>
             </NavItem>
             <NavItem
               to={"rutasRecoridas"}

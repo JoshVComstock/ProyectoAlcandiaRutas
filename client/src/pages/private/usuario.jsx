@@ -159,7 +159,7 @@ const Usuario = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/usuario", {
+      const response = await fetch("https://backendrutas.onrender.com/usuario", {
         method: "GET",
         headers: {
           "content-type": "application/json",
@@ -184,11 +184,11 @@ const Usuario = () => {
     try {
       if (editingUser) {
         await axios.put(
-          `http://127.0.0.1:3000/usuario/${editingUser.id}`,
+          `https://backendrutas.onrender.com/usuario/${editingUser.id}`,
           formData
         );
       } else {
-        await axios.post("http://127.0.0.1:3000/usuario", formData);
+        await axios.post("https://backendrutas.onrender.com/usuario", formData);
       }
       fetchUsers();
       setModalOpen(false);
@@ -207,7 +207,7 @@ const Usuario = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:3000/usuario/${id}`);
+      await axios.delete(`https://backendrutas.onrender.com/usuario/${id}`);
       fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
